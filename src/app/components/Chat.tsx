@@ -1,4 +1,4 @@
-"use client"
+
 import { ChatRoomProvider} from "@ably/chat/react"
 import ChatBox from "./ChatBox";
 import ConnectionStatus from "./ConnectionStatus";
