@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ably/chat": "^0.14.1",
+    "@neondatabase/serverless": "^1.0.1",
+    "ably": "^2.14.0",
+    "nanoid": "^5.1.6",
     "next": "15.5.3",
-    "pusher": "^5.2.0",
-    "pusher-js": "^4.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
@@ -19,7 +21,6 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/pusher-js": "^4.2.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
