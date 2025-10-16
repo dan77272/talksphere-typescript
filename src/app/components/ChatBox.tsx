@@ -119,7 +119,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
   }
 
   return (
-  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center">
+  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center min-h-[400px]">
     <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 relative flex-1 overflow-y-auto" id="chatbox">
       <p className="font-semibold">{occupancyMessage}</p>
       {messages.map((msg: Message) => {

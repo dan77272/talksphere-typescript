@@ -12,12 +12,12 @@ export default function Home() {
   return (
     <>
     {isOpen ?
-      <div className="h-screen min-h-[700px] flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <Navbar/>
         <ChatPage/>
       </div> 
     : 
-      <div className="h-screen min-h-[700px] flex flex-col">
+      <div className="min-h-dvh flex flex-col">
         <Navbar/>
         <HomePage isOpen={isOpen} setIsOpen={setIsOpen}/>
       </div>
