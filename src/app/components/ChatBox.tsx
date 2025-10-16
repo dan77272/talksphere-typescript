@@ -1,16 +1,19 @@
-'use client'
 
 import { ChatMessageEvent, ChatMessageEventType, Message } from "@ably/chat";
-import { useMessages, useOccupancy, useRoom, useTyping } from "@ably/chat/react";
-import { useState } from "react";
+import { useChatClient, useMessages, useOccupancy, useRoom, useTyping } from "@ably/chat/react";
+import { useEffect, useState } from "react";
 import { chatClient, userId } from "../lib/ably";
+import { nanoid } from "nanoid";
+import { IoIosSend } from "react-icons/io";
+import { FaStop, FaCheck  } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
 
 interface Users{
   me_id: string;
   partner_id: string
 }
 
-export default function ChatBox({users}: {users: Users}) {
+export default function ChatBox({users, setRoomName, clientId}: {users: Users, setRoomName: React.Dispatch<React.SetStateAction<string>>, clientId: string}) {
 
   const [inputValue, setInputValue] = useState('');
   // State to hold the messages
@@ -19,6 +22,23 @@ export default function ChatBox({users}: {users: Users}) {
   const [occupancyMessage, setOccupancyMessage] = useState('Looking for someone to chat with...')
   const [leftMessage, setLeftMessage] = useState('')
   const [disableChat, setDisableChat] = useState(false)
+  const [toggleStop, setToggleStop] = useState('stop')
+
+  const [currentRoomStatus, setCurrentRoomStatus] = useState('');
+
+
+  useEffect(() => {
+    const chatBox = document.getElementById('chatbox')
+    chatBox?.scrollTo({top: chatBox.scrollHeight, behavior: "smooth"})
+  }, [messages])
+
+  
+  const {roomName} = useRoom({
+    onStatusChange: (status) => {
+      setCurrentRoomStatus(status.current); // Update the room status
+      if(status.current === 'released') setToggleStop('new')
+    },
+  });
 
   const { connections } = useOccupancy({
     listener: (occupancyEvent) => {
@@ -29,8 +49,8 @@ export default function ChatBox({users}: {users: Users}) {
       }else if(occupancyEvent.occupancy.connections < occupancy){
         setOccupancy(occupancyEvent.occupancy.connections)
         setLeftMessage("Stranger has left the chat.")
+        setToggleStop('new')
       }
-      
     },
   });
 
@@ -52,6 +72,8 @@ export default function ChatBox({users}: {users: Users}) {
   });
 
   const { currentlyTyping, keystroke, stop } = useTyping();
+  const typingClientIds = Array.from(currentlyTyping).filter((id) => id !== clientId);
+
 
   /* replace the existing handleSend method with the following */
   const handleSend = () => {
@@ -59,7 +81,7 @@ export default function ChatBox({users}: {users: Users}) {
     sendMessage({text: inputValue.trim()}).catch((err) =>
       console.error('Error sending message', err))
     setInputValue('');
-
+    if(toggleStop === 'sure') setToggleStop('stop')
     /* stop typing when the message is sent */
     stop().catch((err) => console.error('Error stopping typing', err))
   };
@@ -80,13 +102,25 @@ export default function ChatBox({users}: {users: Users}) {
   };
 
   async function handleLeaveRoom(){
-    await chatClient.rooms.release('my-first-room')
+    await chatClient.rooms.release(roomName)
+    const res = await fetch('/api/queue', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({roomName: roomName})
+    })
+    const data = await res.json()
+    console.log(data)
     setDisableChat(true)
   }
 
+  async function handleNewChat(){
+    const newRoomName = nanoid()
+    setRoomName(newRoomName)
+  }
+
   return (
-  <div className="bg-[#fff6ed] flex flex-1 relative">
-    <div className="bg-white w-full mx-4 mt-4 mb-28 rounded-lg p-2 relative">
+  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center min-h-0">
+    <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 relative flex-1 overflow-y-auto" id="chatbox">
       <p className="font-semibold">{occupancyMessage}</p>
       {messages.map((msg: Message) => {
         const isMine = msg.clientId === userId;
@@ -97,36 +131,52 @@ export default function ChatBox({users}: {users: Users}) {
         );
       })}
     <p className="font-semibold">{connections < 2 && leftMessage}</p>
-    <div className="h-6 px-2 pt-2 absolute bottom-2">
-        {currentlyTyping.size > 0 && (
+    {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
+    <div className="">
+        {typingClientIds.length > 0  && (
           <p className="text-sm text-gray-700 overflow-hidden">
-            {Array.from(currentlyTyping).join(', ')}
-            {' '}
-            {currentlyTyping.size > 1 ? 'are' : 'is'} typing...
+            Stranger is typing...
           </p>
         )}
       </div>
     </div>
-    <div className="absolute bottom-0 w-full flex">
-        <button className="p-8 border-1 bg-gray-100 cursor-pointer" onClick={handleLeaveRoom}>Stop</button>
+    <div className="w-full flex max-lg:justify-center max-lg:relative">
+        {toggleStop === 'stop' ?
+        <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('sure')}>
+          <FaStop className="lg:hidden"/>
+          <p className="max-lg:hidden">Stop</p>
+        </button>
+        : toggleStop === 'sure' ?
+        <div>
+          <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-18 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 lg:h-full" onClick={handleLeaveRoom}>
+            <FaCheck className="lg:hidden"/>
+            <p className="max-lg:hidden">Are you sure?</p>
+          </button>
+          <button className="lg:hidden p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('stop')}>
+            <ImCross/>
+          </button>
+        </div>
+        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>New Chat</button>}
       <textarea
         disabled={connections < 2 || disableChat}
         placeholder="Type your message..."
-        className="flex-1 border outline-none bg-white px-2 py-1 resize-none align-top"
+        className={`lg:flex-1 border outline-none bg-white lg:px-2 py-1 resize-none align-top max-lg:w-full max-lg:mx-5 max-lg:rounded-full ${toggleStop === 'sure' ? 'px-24' : 'px-14'}`}
         value={inputValue}
         onChange={handleChange}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
+            event.preventDefault()
             handleSend();
           }
         }}
       />
       <button
         disabled={connections < 2 || disableChat}
-        className={`p-8 border-1 bg-gray-100 ${connections < 2 && 'cursor-not-allowed'}`}
+        className={`lg:p-8 border-1 bg-gray-100 max-lg:rounded-full max-lg:absolute right-7 max-lg:top-1/2 max-lg:-translate-y-1/2 p-2 ${connections < 2 && 'cursor-not-allowed'}`}
         onClick={handleSend}
       >
-        Send
+        <IoIosSend className="lg:hidden"/>
+        <p className="max-lg:hidden">Send</p>
       </button>
     </div>
   </div>

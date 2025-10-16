@@ -1,7 +1,7 @@
 export default function HomePage({isOpen, setIsOpen}: {isOpen: boolean, setIsOpen: React.Dispatch<React.SetStateAction<boolean>>}){
     return (
         <div className="flex flex-col justify-center items-center flex-1 gap-5 bg-[#fff6ed]">
-            <p className="text-3xl">Start chatting with a random stranger!</p>
+            <p className="lg:text-3xl text-2xl text-center font-semibold">Start chatting with a random stranger!</p>
             <button className="bg-blue-800 text-white text-2xl px-5 py-2 rounded-lg cursor-pointer bg-gradient-to-br from-orange-400 to-blue-900" onClick={() => setIsOpen(!isOpen)}>Text</button>
         </div>
     )

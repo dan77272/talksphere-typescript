@@ -41,3 +41,13 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, claimed: mine });
 }
 
+export async function DELETE(req: Request){
+  const {roomName} = await req.json()
+  await sql`
+    DELETE FROM chat.queue
+    WHERE user_id = ${roomName} OR claimed_by = ${roomName}
+  `
+
+  return NextResponse.json({message: 'Users cleared from queue successfully'}, {status: 200})
+}
+

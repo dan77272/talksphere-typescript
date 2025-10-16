@@ -1,5 +1,5 @@
 
-import { ChatRoomProvider} from "@ably/chat/react"
+import { ChatRoomProvider, useChatClient} from "@ably/chat/react"
 import ChatBox from "./ChatBox";
 import ConnectionStatus from "./ConnectionStatus";
 import RoomStatus from "./RoomStatus";
@@ -13,12 +13,14 @@ interface Users{
 
 export default function ChatPage() {
 
-  const userIdRef = useRef('')
-  if(!userIdRef.current){
-    userIdRef.current = nanoid()
-  }
+  // const userIdRef = useRef('')
+  // if(!userIdRef.current){
+  //   userIdRef.current = nanoid()
+  // }
 
-  const [roomName, setRoomName] = useState(userIdRef.current)
+
+  const {clientId} = useChatClient()
+  const [roomName, setRoomName] = useState(clientId)
   const [users, setUsers] = useState<Users>(() => ({} as Users))
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function ChatPage() {
       const response = await fetch('/api/queue', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({userId: userIdRef.current, now: new Date().toISOString()})
+        body: JSON.stringify({userId: roomName, now: new Date().toISOString()})
       })
       const data = await response.json()
       console.log(data)
@@ -46,14 +48,14 @@ export default function ChatPage() {
       options={{occupancy: {enableEvents: true}}}
     >
         <div className="flex flex-row w-full border-1 border-blue-500 rounded-lg overflow-hidden mx-auto font-sans">
-          <div className="flex-1 border-1 border-blue-500">
+          <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
             <ConnectionStatus/>
           </div>
-          <div className="flex-1 border-1 border-blue-500">
+          <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
             <RoomStatus/>
           </div>
         </div>
-        <ChatBox users={users}/>
+        <ChatBox users={users} setRoomName={setRoomName} clientId={clientId}/>
     </ChatRoomProvider>
   );
 }
