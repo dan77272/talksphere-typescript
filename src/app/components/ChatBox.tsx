@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { chatClient, userId } from "../lib/ably";
 import { nanoid } from "nanoid";
 import { IoIosSend } from "react-icons/io";
-import { FaStop, FaCheck  } from "react-icons/fa";
+import { FaStop, FaCheck, FaPlus} from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 
 interface Users{
@@ -156,7 +156,10 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
             <ImCross/>
           </button>
         </div>
-        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>New Chat</button>}
+        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>
+            <FaPlus className="lg:hidden"/>
+            <p className="max-lg:hidden">New Chat</p>
+          </button>}
       <textarea
         disabled={connections < 2 || disableChat}
         placeholder="Type your message..."
