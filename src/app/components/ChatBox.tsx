@@ -119,7 +119,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
   }
 
   return (
-  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center min-h-0">
+  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center min-h-0 h-screen">
     <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 relative flex-1 overflow-y-auto" id="chatbox">
       <p className="font-semibold">{occupancyMessage}</p>
       {messages.map((msg: Message) => {
@@ -140,23 +140,23 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
         )}
       </div>
     </div>
-    <div className="w-full flex max-lg:justify-center max-lg:relative pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full flex max-lg:justify-center max-lg:relative max-lg:pb-14">
         {toggleStop === 'stop' ?
-        <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 pb-[env(safe-area-inset-bottom)]" onClick={() => setToggleStop('sure')}>
+        <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/4 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('sure')}>
           <FaStop className="lg:hidden"/>
           <p className="max-lg:hidden">Stop</p>
         </button>
         : toggleStop === 'sure' ?
         <div>
-          <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-18 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 lg:h-full pb-[env(safe-area-inset-bottom)]" onClick={handleLeaveRoom}>
+          <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-18 top-1/4 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 lg:h-full" onClick={handleLeaveRoom}>
             <FaCheck className="lg:hidden"/>
             <p className="max-lg:hidden">Are you sure?</p>
           </button>
-          <button className="lg:hidden p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 pb-[env(safe-area-inset-bottom)]" onClick={() => setToggleStop('stop')}>
+          <button className="lg:hidden p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/4 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('stop')}>
             <ImCross/>
           </button>
         </div>
-        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 pb-[env(safe-area-inset-bottom)]" onClick={handleNewChat}>New Chat</button>}
+        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/4 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>New Chat</button>}
       <textarea
         disabled={connections < 2 || disableChat}
         placeholder="Type your message..."
@@ -172,7 +172,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       />
       <button
         disabled={connections < 2 || disableChat}
-        className={`lg:p-8 border-1 bg-gray-100 max-lg:rounded-full max-lg:absolute right-7 max-lg:top-1/2 max-lg:-translate-y-1/2 p-2 pb-[env(safe-area-inset-bottom)] ${connections < 2 && 'cursor-not-allowed'}`}
+        className={`lg:p-8 border-1 bg-gray-100 max-lg:rounded-full max-lg:absolute right-7 max-lg:top-1/4 max-lg:-translate-y-1/2 p-2 ${connections < 2 && 'cursor-not-allowed'}`}
         onClick={handleSend}
       >
         <IoIosSend className="lg:hidden"/>
