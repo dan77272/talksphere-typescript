@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: "TalkSphere",
   description: "Anonymous chatapp",
 };
+
+export const viewport: Viewport = {
+  themeColor: '#fff6ed'
+}
 
 export default function RootLayout({
   children,
