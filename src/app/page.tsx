@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <>
     {isOpen ?
-      <div className="min-h-dvh flex flex-col">
+      <div className="min-h-dvh h-screen flex flex-col bg-[#fff6ed]">
         <Navbar/>
         <ChatPage/>
       </div> 

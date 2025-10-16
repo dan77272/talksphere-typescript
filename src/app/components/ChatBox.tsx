@@ -132,7 +132,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       })}
     <p className="font-semibold">{connections < 2 && leftMessage}</p>
     {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
-    <div className="">
+    <div className="absolute bottom-0">
         {typingClientIds.length > 0  && (
           <p className="text-sm text-gray-700 overflow-hidden">
             Stranger is typing...
