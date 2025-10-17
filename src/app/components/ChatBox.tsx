@@ -163,7 +163,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       <textarea
         disabled={connections < 2 || disableChat}
         placeholder="Type your message..."
-        className={`lg:flex-1 border outline-none bg-white lg:px-2 py-1 resize-none align-top max-lg:w-full max-lg:mx-5 max-lg:rounded-full ${toggleStop === 'sure' ? 'px-24' : 'px-14'}`}
+        className={`lg:flex-1 border outline-none bg-white lg:px-2 py-1 resize-none max-lg:w-full max-lg:mx-5 max-lg:rounded-full ${toggleStop === 'sure' ? 'px-24' : 'px-14'}`}
         value={inputValue}
         onChange={handleChange}
         onKeyDown={(event) => {
