@@ -119,8 +119,8 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
   }
 
   return (
-  <div className="bg-[#fff6ed] flex flex-1 relative flex-col items-center min-h-[400px]">
-    <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 relative flex-1 overflow-y-auto" id="chatbox">
+  <div className="bg-[#fff6ed] flex flex-1 flex-col items-center max-lg:min-h-dvh min-h-[700px]">
+    <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 flex-1 overflow-y-auto relative" id="chatbox">
       <p className="font-semibold">{occupancyMessage}</p>
       {messages.map((msg: Message) => {
         const isMine = msg.clientId === userId;
@@ -132,7 +132,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       })}
     <p className="font-semibold">{connections < 2 && leftMessage}</p>
     {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
-    <div className="absolute bottom-0">
+    <div className="sticky bottom-0 bg-white w-full">
         {typingClientIds.length > 0  && (
           <p className="text-sm text-gray-700 overflow-hidden">
             Stranger is typing...
@@ -140,23 +140,26 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
         )}
       </div>
     </div>
-    <div className="w-full flex max-lg:justify-center max-lg:relative pb-[env(safe-area-inset-bottom)]">
+  <div className="max-lg:sticky max-lg:bottom-0 w-full flex max-lg:items-center max-lg:justify-center
+                  bg-[#fff6ed]
+                  max-lg:pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)]
+                  max-lg:pt-2">
         {toggleStop === 'stop' ?
-        <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('sure')}>
+        <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('sure')}>
           <FaStop className="lg:hidden"/>
           <p className="max-lg:hidden">Stop</p>
         </button>
         : toggleStop === 'sure' ?
         <div>
-          <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-18 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 lg:h-full" onClick={handleLeaveRoom}>
+          <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-18 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2 lg:h-full" onClick={handleLeaveRoom}>
             <FaCheck className="lg:hidden"/>
             <p className="max-lg:hidden">Are you sure?</p>
           </button>
-          <button className="lg:hidden p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('stop')}>
+          <button className="lg:hidden p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('stop')}>
             <ImCross/>
           </button>
         </div>
-        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>
+        : toggleStop === 'new' && <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-1/2 max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={handleNewChat}>
             <FaPlus className="lg:hidden"/>
             <p className="max-lg:hidden">New Chat</p>
           </button>}
@@ -175,7 +178,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       />
       <button
         disabled={connections < 2 || disableChat}
-        className={`lg:p-8 border-1 bg-gray-100 max-lg:rounded-full max-lg:absolute right-7 top-[29px] max-lg:-translate-y-1/2 p-2 ${connections < 2 && 'cursor-not-allowed'}`}
+        className={`lg:p-8 border-1 bg-gray-100 max-lg:rounded-full max-lg:absolute right-7 top-1/2 max-lg:-translate-y-1/2 p-2 ${connections < 2 && 'cursor-not-allowed'}`}
         onClick={handleSend}
       >
         <IoIosSend className="lg:hidden"/>
