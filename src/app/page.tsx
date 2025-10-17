@@ -18,7 +18,7 @@ export default function Home() {
       </div> 
     : 
       <div className="min-h-dvh flex flex-col">
-        {/* <Navbar/> */}
+        <Navbar/>
         <HomePage isOpen={isOpen} setIsOpen={setIsOpen}/>
       </div>
     }
