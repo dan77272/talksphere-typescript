@@ -140,7 +140,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
         )}
       </div>
     </div>
-    <div className="w-full flex max-lg:justify-center max-lg:relative max-lg:pb-2 pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full flex max-lg:justify-center max-lg:relative pb-[env(safe-area-inset-bottom)]">
         {toggleStop === 'stop' ?
         <button className="p-1 border-1 bg-gray-100 cursor-pointer lg:w-24 max-lg:rounded-full left-7 top-[29px] max-lg:-translate-y-1/2 max-lg:absolute max-lg:p-2" onClick={() => setToggleStop('sure')}>
           <FaStop className="lg:hidden"/>

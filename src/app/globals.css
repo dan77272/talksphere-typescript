@@ -3,3 +3,7 @@
 :root{
     background-color: #fff6ed;
 }
+
+body{
+    min-height: -webkit-fill-available;
+}
