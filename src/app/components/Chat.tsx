@@ -1,15 +1,7 @@
 
 import { ChatRoomProvider, useChatClient} from "@ably/chat/react"
 import ChatBox from "./ChatBox";
-import ConnectionStatus from "./ConnectionStatus";
-import RoomStatus from "./RoomStatus";
-import { useEffect, useRef, useState } from "react";
-import { nanoid } from "nanoid";
-
-interface Users{
-  me_id: string;
-  partner_id: string
-}
+import { useEffect, useState } from "react";
 
 export default function ChatPage() {
 
@@ -21,7 +13,6 @@ export default function ChatPage() {
 
   const {clientId} = useChatClient()
   const [roomName, setRoomName] = useState(clientId)
-  const [users, setUsers] = useState<Users>(() => ({} as Users))
 
   useEffect(() => {
 
@@ -35,7 +26,6 @@ export default function ChatPage() {
       console.log(data)
       if(data.claimed){
         setRoomName(data.claimed.claimed_by)
-        setUsers(data.claimed)
       }
     }
     checkQueue()
@@ -47,15 +37,15 @@ export default function ChatPage() {
       name={roomName} // The room name you want to create or join
       options={{occupancy: {enableEvents: true}}}
     >
-        <div className="flex flex-row w-full border-1 border-blue-500 rounded-lg overflow-hidden mx-auto font-sans">
+        {/* <div className="flex flex-row w-full border-1 border-blue-500 rounded-lg overflow-hidden mx-auto font-sans">
           <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
             <ConnectionStatus/>
           </div>
           <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
             <RoomStatus/>
           </div>
-        </div>
-        <ChatBox users={users} setRoomName={setRoomName} clientId={clientId}/>
+        </div> */}
+        <ChatBox setRoomName={setRoomName} clientId={clientId}/>
     </ChatRoomProvider>
   );
 }

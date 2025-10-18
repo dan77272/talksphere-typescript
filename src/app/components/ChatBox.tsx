@@ -1,6 +1,6 @@
 
 import { ChatMessageEvent, ChatMessageEventType, Message } from "@ably/chat";
-import { useChatClient, useMessages, useOccupancy, useRoom, useTyping } from "@ably/chat/react";
+import { useMessages, useOccupancy, useRoom, useTyping } from "@ably/chat/react";
 import { useEffect, useState } from "react";
 import { chatClient, userId } from "../lib/ably";
 import { nanoid } from "nanoid";
@@ -8,12 +8,7 @@ import { IoIosSend } from "react-icons/io";
 import { FaStop, FaCheck, FaPlus} from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 
-interface Users{
-  me_id: string;
-  partner_id: string
-}
-
-export default function ChatBox({users, setRoomName, clientId}: {users: Users, setRoomName: React.Dispatch<React.SetStateAction<string>>, clientId: string}) {
+export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dispatch<React.SetStateAction<string>>, clientId: string}) {
 
   const [inputValue, setInputValue] = useState('');
   // State to hold the messages
@@ -134,7 +129,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
       })}
     <p className="font-semibold">{connections < 2 && leftMessage}</p>
     {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
-    <div className="sticky bottom-0 bg-white w-full">
+    <div className="sticky bg-white">
         {typingClientIds.length > 0  && (
           <p className="text-sm text-gray-700 overflow-hidden">
             Stranger is typing...
