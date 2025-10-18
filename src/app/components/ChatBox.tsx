@@ -37,6 +37,7 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
     onStatusChange: (status) => {
       setCurrentRoomStatus(status.current); // Update the room status
       if(status.current === 'released') setToggleStop('new')
+      else if(status.current === 'detached') handleLeaveRoom()
     },
   });
 
@@ -106,7 +107,8 @@ export default function ChatBox({users, setRoomName, clientId}: {users: Users, s
     const res = await fetch('/api/queue', {
       method: 'DELETE',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({roomName: roomName})
+      body: JSON.stringify({roomName: roomName}),
+      keepalive: true
     })
     const data = await res.json()
     console.log(data)

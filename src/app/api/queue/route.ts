@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const { userId } = await req.json();
+  console.log("userId: " + userId)
   if (!userId) return NextResponse.json({ error: "No userId" }, { status: 400 });
 
   await sql`
