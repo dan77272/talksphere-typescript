@@ -8,18 +8,20 @@ import ChatPage from "./components/Chat";
 export default function Home() {
 
   const [isOpen, setIsOpen] = useState(false)
+  const [onlineCount, setOnlineCount] = useState<number | null>(null)
+
 
   return (
     <>
     {isOpen ?
       <div className="min-h-dvh h-screen flex flex-col bg-[#fff6ed]">
-        <Navbar/>
-        <ChatPage/>
+        <Navbar onlineCount={onlineCount}/>
+        <ChatPage setOnlineCount={setOnlineCount}/>
       </div> 
     : 
       <div className="min-h-dvh flex flex-col">
-        <Navbar/>
-        <HomePage isOpen={isOpen} setIsOpen={setIsOpen}/>
+        <Navbar onlineCount={onlineCount}/>
+        <HomePage isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
     }
     </>

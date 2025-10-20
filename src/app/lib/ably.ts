@@ -8,7 +8,9 @@ export const userId = nanoid()
 
 const realtimeClient = new Ably.Realtime({
     key: process.env.NEXT_PUBLIC_API_KEY,
-    clientId: userId
+    clientId: userId,
+    recover: "connection",
+    closeOnUnload: true
 })
 
 export const chatClient = new ChatClient(realtimeClient, {

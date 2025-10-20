@@ -2,13 +2,13 @@
 import { ChatMessageEvent, ChatMessageEventType, Message } from "@ably/chat";
 import { useMessages, useOccupancy, useRoom, useTyping } from "@ably/chat/react";
 import { useEffect, useState } from "react";
-import { chatClient, userId } from "../lib/ably";
+import { chatClient, realtimeClient, userId } from "../lib/ably";
 import { nanoid } from "nanoid";
 import { IoIosSend } from "react-icons/io";
 import { FaStop, FaCheck, FaPlus} from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 
-export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dispatch<React.SetStateAction<string>>, clientId: string}) {
+export default function ChatBox({setRoomName, clientId, setOnlineCount}: {setRoomName: React.Dispatch<React.SetStateAction<string>>, clientId: string, setOnlineCount: React.Dispatch<React.SetStateAction<number | null>>}) {
 
   const [inputValue, setInputValue] = useState('');
   // State to hold the messages
@@ -27,6 +27,21 @@ export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dis
     chatBox?.scrollTo({top: chatBox.scrollHeight, behavior: "smooth"})
   }, [messages])
 
+  useEffect(() => {
+    const channel = realtimeClient.channels.get("presence:lobby")
+    channel.presence.enter({status: 'online'})
+
+    async function updateCount(){
+      const members = await channel.presence.get({waitForSync: true})
+      const uniqueUsers = new Set(members.map(m => m.clientId))
+      setOnlineCount(uniqueUsers.size)
+    }
+
+    channel.presence.subscribe("enter", updateCount)
+    channel.presence.subscribe("leave", updateCount)
+    updateCount()
+  }, [])
+
   
   const {roomName} = useRoom({
     onStatusChange: (status) => {
@@ -38,7 +53,6 @@ export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dis
 
   const { connections } = useOccupancy({
     listener: (occupancyEvent) => {
-      console.log('Number of users connected is: ', occupancyEvent.occupancy.connections);
       if(occupancyEvent.occupancy.connections > occupancy){
          setOccupancy(occupancyEvent.occupancy.connections)
          setOccupancyMessage("You're now chatting with a random stranger.")
@@ -99,14 +113,12 @@ export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dis
 
   async function handleLeaveRoom(){
     await chatClient.rooms.release(roomName)
-    const res = await fetch('/api/queue', {
+    await fetch('/api/queue', {
       method: 'DELETE',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({roomName: roomName}),
       keepalive: true
     })
-    const data = await res.json()
-    console.log(data)
     setDisableChat(true)
   }
 
@@ -117,19 +129,21 @@ export default function ChatBox({setRoomName, clientId}: {setRoomName: React.Dis
 
   return (
   <div className="bg-[#fff6ed] flex flex-1 flex-col items-center max-lg:min-h-dvh min-h-[700px]">
-    <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 flex-1 overflow-y-auto relative" id="chatbox">
-      <p className="font-semibold">{occupancyMessage}</p>
-      {messages.map((msg: Message) => {
-        const isMine = msg.clientId === userId;
-        return (
-          <div key={msg.serial} className={`max-w-[60%] mb-1`}>
-            {isMine ? <p className="font-semibold"><span className="text-blue-800">You: </span>{msg.text}</p> : <p className="font-semibold"><span className="text-red-600">Stranger: </span>{msg.text}</p>}
-          </div>
-        );
-      })}
-    <p className="font-semibold">{connections < 2 && leftMessage}</p>
-    {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
-    <div className="sticky bg-white">
+    <div className="bg-white w-[98%] mx-auto my-3 rounded-lg p-2 flex-1 relative overflow-y-auto flex flex-col justify-between" id="chatbox">
+      <div>
+        <p className="font-semibold">{occupancyMessage}</p>
+        {messages.map((msg: Message) => {
+          const isMine = msg.clientId === userId;
+          return (
+            <div key={msg.serial} className={`max-w-[60%] mb-1`}>
+              {isMine ? <p className="font-semibold"><span className="text-blue-800">You: </span>{msg.text}</p> : <p className="font-semibold"><span className="text-red-600">Stranger: </span>{msg.text}</p>}
+            </div>
+          );
+        })}
+      <p className="font-semibold">{connections < 2 && leftMessage}</p>
+      {currentRoomStatus === 'released' && <p className="font-semibold">Chat ended.</p>}
+      </div>
+      <div className="sticky bottom-0 bg-white">
         {typingClientIds.length > 0  && (
           <p className="text-sm text-gray-700 overflow-hidden">
             Stranger is typing...

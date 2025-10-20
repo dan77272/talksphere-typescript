@@ -3,19 +3,13 @@ import { ChatRoomProvider, useChatClient} from "@ably/chat/react"
 import ChatBox from "./ChatBox";
 import { useEffect, useState } from "react";
 
-export default function ChatPage() {
-
-  // const userIdRef = useRef('')
-  // if(!userIdRef.current){
-  //   userIdRef.current = nanoid()
-  // }
-
+export default function ChatPage({setOnlineCount}: {setOnlineCount: React.Dispatch<React.SetStateAction<number | null>>}) {
 
   const {clientId} = useChatClient()
   const [roomName, setRoomName] = useState(clientId)
 
-  useEffect(() => {
 
+  useEffect(() => {
     async function checkQueue(){
       const response = await fetch('/api/queue', {
         method: 'POST',
@@ -23,7 +17,6 @@ export default function ChatPage() {
         body: JSON.stringify({userId: roomName, now: new Date().toISOString()})
       })
       const data = await response.json()
-      console.log(data)
       if(data.claimed){
         setRoomName(data.claimed.claimed_by)
       }
@@ -45,7 +38,7 @@ export default function ChatPage() {
             <RoomStatus/>
           </div>
         </div> */}
-        <ChatBox setRoomName={setRoomName} clientId={clientId}/>
+        <ChatBox setRoomName={setRoomName} clientId={clientId} setOnlineCount={setOnlineCount}/>
     </ChatRoomProvider>
   );
 }
