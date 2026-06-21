@@ -1,56 +1,43 @@
-import { ChatRoomProvider, useChatClient } from "@ably/chat/react";
+import { ChatRoomProvider, useChatClient} from "@ably/chat/react"
 import ChatBox from "./ChatBox";
 import { useEffect, useState } from "react";
 
-export default function ChatPage({
-  setOnlineCount,
-}: {
-  setOnlineCount: React.Dispatch<React.SetStateAction<number | null>>;
-}) {
-  const { clientId } = useChatClient();
+export default function ChatPage({setOnlineCount}: {setOnlineCount: React.Dispatch<React.SetStateAction<number | null>>}) {
 
-  const [roomName, setRoomName] = useState<string>("");
+  const {clientId} = useChatClient()
+  const [roomName, setRoomName] = useState(clientId)
+
 
   useEffect(() => {
-    if (!clientId || roomName) return;
-
-    const interval = setInterval(async () => {
-      const response = await fetch("/api/queue", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: clientId }),
-      });
-
-      const data = await response.json();
-
-      if (data.claimed?.partner_id) {
-        const matchedRoomName = [clientId, data.claimed.partner_id]
-          .sort()
-          .join("-");
-
-        setRoomName(matchedRoomName);
-        clearInterval(interval);
+    async function checkQueue(){
+      const response = await fetch('/api/queue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({userId: roomName, now: new Date().toISOString()})
+      })
+      const data = await response.json()
+      if(data.claimed){
+        setRoomName(data.claimed.claimed_by)
       }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [clientId, roomName]);
-
-  if (!roomName) {
-    return <p>Looking for someone to chat with...</p>;
-  }
-
+    }
+    checkQueue()
+  }, [roomName])
+  
   return (
     <ChatRoomProvider
       key={roomName}
-      name={roomName}
-      options={{ occupancy: { enableEvents: true } }}
+      name={roomName} // The room name you want to create or join
+      options={{occupancy: {enableEvents: true}}}
     >
-      <ChatBox
-        setRoomName={setRoomName}
-        clientId={clientId}
-        setOnlineCount={setOnlineCount}
-      />
+        {/* <div className="flex flex-row w-full border-1 border-blue-500 rounded-lg overflow-hidden mx-auto font-sans">
+          <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
+            <ConnectionStatus/>
+          </div>
+          <div className="flex-1 border-1 border-blue-500 max-lg:hidden">
+            <RoomStatus/>
+          </div>
+        </div> */}
+        <ChatBox setRoomName={setRoomName} clientId={clientId} setOnlineCount={setOnlineCount}/>
     </ChatRoomProvider>
   );
 }
