@@ -8,79 +8,60 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No userId" }, { status: 400 });
   }
 
-  const [result] = await sql.transaction([
-    sql`
-      INSERT INTO chat.queue (user_id, joined_at)
-      VALUES (${userId}, NOW())
-      ON CONFLICT (user_id) DO NOTHING
-      RETURNING user_id
-    `,
+  await sql`
+    INSERT INTO chat.queue (user_id, joined_at)
+    VALUES (${userId}, NOW())
+    ON CONFLICT (user_id) DO NOTHING
+  `;
 
-    sql`
-      SELECT user_id AS me_id, claimed_by AS partner_id, claimed_at
-      FROM chat.queue
-      WHERE user_id = ${userId}
-        AND claimed_by IS NOT NULL
-      LIMIT 1
-    `,
-
-    sql`
-      WITH partner AS (
-        SELECT user_id AS partner_id
-        FROM chat.queue
-        WHERE user_id <> ${userId}
-          AND claimed_by IS NULL
-        ORDER BY joined_at ASC
-        FOR UPDATE SKIP LOCKED
-        LIMIT 1
-      ),
-      update_me AS (
-        UPDATE chat.queue
-        SET claimed_by = partner.partner_id,
-            claimed_at = NOW()
-        FROM partner
-        WHERE chat.queue.user_id = ${userId}
-          AND chat.queue.claimed_by IS NULL
-        RETURNING chat.queue.user_id AS me_id, chat.queue.claimed_by AS partner_id, chat.queue.claimed_at
-      ),
-      update_partner AS (
-        UPDATE chat.queue
-        SET claimed_by = ${userId},
-            claimed_at = NOW()
-        FROM partner
-        WHERE chat.queue.user_id = partner.partner_id
-          AND chat.queue.claimed_by IS NULL
-        RETURNING chat.queue.user_id
-      )
-      SELECT * FROM update_me
-    `,
-  ]);
-
-  const existing = result[1];
-  const matched = result[2];
+  const existing = await sql`
+    SELECT user_id AS me_id, claimed_by AS partner_id, claimed_at
+    FROM chat.queue
+    WHERE user_id = ${userId}
+      AND claimed_by IS NOT NULL
+    LIMIT 1
+  `;
 
   if (existing.length > 0) {
     return NextResponse.json({ ok: true, claimed: existing[0] });
   }
 
-  return NextResponse.json({
-    ok: true,
-    claimed: matched[0] || null,
-  });
-}
-
-export async function DELETE(req: Request) {
-  const { userId } = await req.json();
-
-  if (!userId) {
-    return NextResponse.json({ error: "No userId" }, { status: 400 });
-  }
-
-  await sql`
-    DELETE FROM chat.queue
-    WHERE user_id = ${userId}
-       OR claimed_by = ${userId}
+  const rows = await sql`
+    UPDATE chat.queue AS q
+    SET claimed_by = CASE
+        WHEN q.user_id = ${userId} THEN p.other_id
+        WHEN q.user_id = p.other_id THEN ${userId}
+      END,
+      claimed_at = NOW()
+    FROM LATERAL (
+      SELECT user_id AS other_id
+      FROM chat.queue
+      WHERE user_id <> ${userId}
+        AND claimed_by IS NULL
+      ORDER BY joined_at ASC
+      FOR UPDATE SKIP LOCKED
+      LIMIT 1
+    ) AS p
+    WHERE q.user_id IN (${userId}, p.other_id)
+      AND q.claimed_by IS NULL
+    RETURNING
+      q.user_id AS me_id,
+      q.claimed_by AS partner_id,
+      q.claimed_at
   `;
 
-  return NextResponse.json({ message: "Users cleared from queue successfully" });
+  const mine = rows.find(r => r.me_id === userId) || null;
+
+  return NextResponse.json({ ok: true, claimed: mine });
 }
+
+export async function DELETE(req: Request){
+  const {roomName} = await req.json()
+  await sql`
+    DELETE FROM chat.queue
+    WHERE user_id = ${roomName} OR claimed_by = ${roomName}
+  `
+
+  return NextResponse.json({message: 'Users cleared from queue successfully'}, {status: 200})
+}
+
